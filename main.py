@@ -1,33 +1,3 @@
-# ---------------------------------------------------------------------- #
-## GENERAL INFORMATION ##
-# Mode by: Ewout
-# Project Manager: Mr. Buys
-# About: Mspaint sucks so we're making our own.
-# ---------------------------------------------------------------------- #
-## SOURCES ##
-# - JSON
-# https://www.geeksforgeeks.org/read-json-file-using-python/
-# https://www.w3schools.com/python/python_json.asp
-# ---------------------------------------------------------------------- #
-## CHANGELOG ##
-# v0.1
-# Forgot to keep track of all my progress but I will from now on.
-# Added sliders
-# Added custom color palettes
-# Added sliders for custom colors
-# Added dynamic pixel ranges (x,y)
-# Added fullscreen
-# Sorted everything in classes
-# Cleaned up some abandoned code
-# ---------------------------------------------------------------------- #
-## TODO ##
-# Recent colors
-# save current color palette if new one was made
-# save current drawing + open a previous drawing
-# --> different ways to save to JSON (bottom to top, top to bottom, left to right, right to left, ...)
-# [COMPLETE]Color palletes
-# [COMPLETE]--> basic color palette at start
-# ---------------------------------------------------------------------- #
 import pygame
 pygame.init()
 import sys
