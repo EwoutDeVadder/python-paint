@@ -187,24 +187,49 @@ class SaveButtonHandler:
     def draw(self, display):
         display.blit(self.textRender, self.rectangle.rectangle)
 
-    def buttonHandler(self, event, rectlist):
+    def buttonHandler(self, event):
         if self.rectangle.startingPosition[0] < event['pos'][0] < self.rectangle.endingPosition[0] and self.rectangle.startingPosition[1] < event['pos'][1] < self.rectangle.endingPosition[1]:
-            self.pack(rectlist)
+            return True
 
-    def pack(self, rectList):
-        frames = []
+class MatrixData:
+    def __init__(self, x_dim=0, y_dim=0, brightness=17, frame_time=0, num_frames=1,mode="rij-per-rij") -> None:
+        self.x_dim = x_dim
+        self.y_dim = y_dim
+        self.brightness = brightness
+        self.frame_time = frame_time
+        self.num_frames = num_frames
+        self.mode = mode
+        self.frames = []
+
+    def packFrames(self, rectList):
+        self.frames = []
         if self.mode == 'rij-per-rij':
             index = 0
             while True:
                 for rows in rectList:
-                    frames.append((round(rows[index].color[0]/17), round(rows[index].color[1]/17), round(rows[index].color[2]/17)))
+                    self.frames.append((round(rows[index].color[0]/self.brightness), round(rows[index].color[1]/self.brightness), round(rows[index].color[2]/self.brightness)))
                     if index == len(rows)-1:
                         index = -1
                 if index == -1:
                     break
                 else:
                     index += 1
-        print(frames)
+    
+    def packAll(self):
+        self.packed = json.dumps({
+            'x_dim': self.x_dim,
+            'y_dim': self.y_dim,
+            'brightness': self.brightness,
+            'frame_time': self.frame_time,
+            'num_frames': self.num_frames,
+            'mode': self.mode,
+            'frames': self.frames
+        })
+
+    def save(self):
+        f = open('untitled.json', 'w')
+        f.write(self.packed)
+
 
 class LoadButtonHandler:
     def __init__(self) -> None:
@@ -221,7 +246,6 @@ def main():
     window.DISPLAYSURF.fill(BGCOLOR)
 
     rectangleList.makeRectangleList(window.space_per_pixel_width, window.space_per_pixel_height)
-    rectangleList.drawRectangles(window.DISPLAYSURF)
 
     redSlider = Slider(window.DISPLAYSURF, (startingDeadSpace, window.height-colorPickerHeight-30+slider_height), slider_width, slider_height/2, GREY, WHITE, 15)
     greenSlider = Slider(window.DISPLAYSURF, (startingDeadSpace, window.height-colorPickerHeight-30+slider_height + slidersOffset), slider_width, slider_height/2, GREY, WHITE, 15)
@@ -236,6 +260,7 @@ def main():
 
     selectedColor = (0,0,0)
     mouseDown = False
+    mouseDownDelay = False
     mousePos = (0,0)
     while True:
 
@@ -256,22 +281,30 @@ def main():
         if customPalette.rects[0].color != (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17):
             customPalette.rects[0].color = (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17)
             selectedColor = customPalette.rects[0].color
-
+        #Good for holding down functions
         if mouseDown:
-            rectangleFound = rectangleList.buttonHandlerForSquares(event.dict)
-            if rectangleFound:
-                rectangleList.rectList[rectangleFound[1][0]][rectangleFound[1][1]].color = selectedColor
+            x = rectangleList.buttonHandlerForSquares(event.dict)
+            if x:
+                rectangleList.rectList[x[1][0]][x[1][1]].color = selectedColor
                 recentColors.addColor(selectedColor)
-
-            rectangleFound = customPalette.buttonHandler(event.dict)
-            if rectangleFound:
-                selectedColor = rectangleFound
-
-            saveButton.buttonHandler(event.dict, rectangleList.rectList)
 
             redSlider.moveSlider(mousePos)
             greenSlider.moveSlider(mousePos)
             blueSlider.moveSlider(mousePos)
+        #Good for once per button down functions
+        if mouseDown != mouseDownDelay and mouseDown == True:
+            mouseDownDelay = mouseDown
+
+            x = saveButton.buttonHandler(event.dict)
+            if x:
+                new_packet = MatrixData(mode=mode)
+                new_packet.packFrames(rectangleList.rectList)
+                new_packet.packAll()
+                new_packet.save()
+
+            x = customPalette.buttonHandler(event.dict)
+            if x:
+                selectedColor = x
 
         for event in pygame.event.get():  # event handling loop
             if event.type == QUIT:
@@ -280,6 +313,7 @@ def main():
                 mouseDown = True
             if event.type == MOUSEBUTTONUP:
                 mouseDown = False
+                mouseDownDelay = False
             if event.type == MOUSEMOTION:
                 mousePos = event.dict['pos']
 
