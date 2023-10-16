@@ -1,10 +1,11 @@
+# 
 import pygame
 pygame.init()
 import sys
 from pygame.locals import *
 import json
-
-pixelDimentions = [16, 16]
+#  ---------------------------
+pixelDimentions = [6, 6]
 spaceBetween = 0.1
 pixel_width = 50
 
@@ -15,7 +16,8 @@ slider_height = 50
 sliderExtraHeight = 2
 slidersOffset = 30
 
-fullscreenMode = True
+fullscreenMode = False
+
 colorPickerHeight = 150
 
 customColorPalette = True
@@ -23,6 +25,16 @@ colorPaletteName = "color_palette.json"
 colorPalette = 0
 colorPaletteOffset = 10
 colorPaletteWidth = pixel_width
+
+recentColorsAmount = 5
+
+saveButtonOffsetTop = 0
+saveButtonOffsetRight = 200
+saveButtonWidth = 100
+saveButtonHeight = 50
+
+modeSelect = ['rij-per-rij']
+mode = modeSelect[0]
 
 extraWidth = slider_width+colorPaletteWidth*2
 
@@ -146,6 +158,60 @@ class ColorPaletteHandler:
         for rect in self.rects:
             pygame.draw.rect(dislpay, rect.color, rect.rectangle)
 
+class RecentColorsHandler:
+    def __init__(self, recentColorsAmount = 5) -> None:
+        self.colors = [(0, 0, 0)]
+        self.maximumRecentColors = recentColorsAmount
+    
+    def addColor(self, color):
+        if self.colors[-1] != color:
+            self.colors.append(color)
+        
+        if len(self.colors) > self.maximumRecentColors:
+            del(self.colors[0])
+
+    def remColor(self, index):
+        del(self.colors[index])
+
+class SaveButtonHandler:
+    def __init__(self, startingPos, width, height, text, mode) -> None:
+        self.rectangle = Rectangle(pygame.Rect(startingPos[0], startingPos[1], width, height), startingPos, (startingPos[0]+width, startingPos[1]+height))
+        self.text = text
+        self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.textRender = self.font.render(self.text, True, BLACK, WHITE)
+        self.rectangle.rectangle = self.textRender.get_rect()
+        self.rectangle.rectangle.center = ((self.rectangle.startingPosition[0]+self.rectangle.endingPosition[0])/2,(self.rectangle.startingPosition[1]+self.rectangle.endingPosition[1])/2)
+
+        self.mode = mode
+
+    def draw(self, display):
+        display.blit(self.textRender, self.rectangle.rectangle)
+
+    def buttonHandler(self, event, rectlist):
+        if self.rectangle.startingPosition[0] < event['pos'][0] < self.rectangle.endingPosition[0] and self.rectangle.startingPosition[1] < event['pos'][1] < self.rectangle.endingPosition[1]:
+            self.pack(rectlist)
+
+    def pack(self, rectList):
+        frames = []
+        if self.mode == 'rij-per-rij':
+            index = 0
+            while True:
+                for rows in rectList:
+                    frames.append((round(rows[index].color[0]/17), round(rows[index].color[1]/17), round(rows[index].color[2]/17)))
+                    if index == len(rows)-1:
+                        index = -1
+                if index == -1:
+                    break
+                else:
+                    index += 1
+        print(frames)
+
+class LoadButtonHandler:
+    def __init__(self) -> None:
+        pass
+
+def settings():
+    return
 
 def main():
     rectangleList = HandleRectangles(pixelDimentions, pixel_width)
@@ -161,17 +227,21 @@ def main():
     greenSlider = Slider(window.DISPLAYSURF, (startingDeadSpace, window.height-colorPickerHeight-30+slider_height + slidersOffset), slider_width, slider_height/2, GREY, WHITE, 15)
     blueSlider = Slider(window.DISPLAYSURF, (startingDeadSpace, window.height-colorPickerHeight-30+slider_height + slidersOffset*2), slider_width, slider_height/2, GREY, WHITE, 15)
 
-    customcolorpalettest = ColorPaletteHandler( customColorPalette, colorPalette)
-    customcolorpalettest.rectangleConfiguration((startingDeadSpace+slider_width+colorPaletteOffset, window.height-colorPickerHeight+slider_height), colorPaletteWidth)
+    customPalette = ColorPaletteHandler( customColorPalette, colorPalette)
+    customPalette.rectangleConfiguration((startingDeadSpace+slider_width+colorPaletteOffset, window.height-colorPickerHeight+slider_height), colorPaletteWidth)
 
-    selectedColor = tuple([0,0,0])
+    recentColors = RecentColorsHandler(recentColorsAmount)
+
+    saveButton = SaveButtonHandler((window.width-saveButtonOffsetRight, saveButtonOffsetTop), saveButtonWidth, saveButtonHeight, "Save", mode)
+
+    selectedColor = (0,0,0)
     mouseDown = False
     mousePos = (0,0)
     while True:
 
         rectangleList.drawRectangles(window.DISPLAYSURF)
 
-        customcolorpalettest.drawColors(window.DISPLAYSURF)
+        customPalette.drawColors(window.DISPLAYSURF)
 
         redSlider.drawRect()
         greenSlider.drawRect()
@@ -181,18 +251,23 @@ def main():
         greenSlider.drawSlider()
         blueSlider.drawSlider()
 
-        if customcolorpalettest.rects[0].color != (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17):
-            customcolorpalettest.rects[0].color = (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17)
-            selectedColor = customcolorpalettest.rects[0].color
+        saveButton.draw(window.DISPLAYSURF)
+
+        if customPalette.rects[0].color != (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17):
+            customPalette.rects[0].color = (redSlider.getColor() * 17, greenSlider.getColor() * 17, blueSlider.getColor() * 17)
+            selectedColor = customPalette.rects[0].color
 
         if mouseDown:
             rectangleFound = rectangleList.buttonHandlerForSquares(event.dict)
             if rectangleFound:
                 rectangleList.rectList[rectangleFound[1][0]][rectangleFound[1][1]].color = selectedColor
+                recentColors.addColor(selectedColor)
 
-            rectangleFound = customcolorpalettest.buttonHandler(event.dict)
+            rectangleFound = customPalette.buttonHandler(event.dict)
             if rectangleFound:
                 selectedColor = rectangleFound
+
+            saveButton.buttonHandler(event.dict, rectangleList.rectList)
 
             redSlider.moveSlider(mousePos)
             greenSlider.moveSlider(mousePos)
