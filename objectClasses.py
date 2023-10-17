@@ -17,13 +17,21 @@ class Object:
     def addCollider(self):
         self.collider = Collider()
 
+    def addComponentByType(self):
+        if self.type == 'slider':
+            self.slider = Slider()
+            return
+        
+        if self.type == 'rectangle':
+            self.rectangle = Rectangle()
+            return
+        
+    def drawObject(self):
+        pass
+
 
 class Slider:
     def __init__(self) -> None:
-        self.position
-        self.dimension
-        self.displaySurface
-
         self.valueRange
         self.currentValue
 
@@ -33,10 +41,6 @@ class Slider:
 
 class Rectangle:
     def __init__(self) -> None:
-        self.position
-        self.dimension
-        self.displaySurface
-
         self.rectangle
 
 
