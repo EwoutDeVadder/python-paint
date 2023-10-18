@@ -27,9 +27,12 @@ class Object:
             return
         
     def drawObject(self):
-        if type == 'slider':
+        if self.type == 'slider':
             pygame.draw.rect(self.displaySurface, self.color, self.slider.rectangle)
             pygame.draw.circle(self.displaySurface, self.accentColor, ())
+
+        if self.type == 'rectangle':
+            pygame.draw.rect(self.displaySurface, self.color, self.rectangle.rectangle)
 
 
 class Slider:
