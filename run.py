@@ -23,6 +23,13 @@ screenResolutionForColors = [0, 200]
 # percentage of screen what should be dead space. FOR THE WIDTH AND HEIGHT
 deadSpaceBetweenGrid = 0.2
 
+# is there a color_palette.json in the directory
+isThereAColorPalette = True
+colorPaletteName = 'color_palette.json'
+
+# should remember how many colors?
+recentColorAmount = 5
+
 #RGB VALUES
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -36,10 +43,14 @@ BGCOLOR = BLACK
 # BASIC CONFIGURATIONS AND CHECKS
 #-------------------------
 
-deadSpaceAtStartForRGBSliders = 10
+deadSpaceAtStartForRGBSliders = 20
 
 rgbSliderDimensions = [500,20]
 rgbSliderDeadSpace = 15
+
+deadSpaceColorPalette = 20
+
+colorPaletteWidth = 50
 
 def config(screenResolution):
     minimumScreenResolution = [800, 400]
@@ -63,9 +74,12 @@ def config(screenResolution):
     displaySurface = pygame.display.set_mode((screenResolution[0], screenResolution[1]))
     fpsClock = pygame.time.Clock()
     # return some nessesary values for other parts of the code
-    return pixelWidth, deadSpacePerPixel, displaySurface, fpsClock
+    return screenResolution, pixelWidth, deadSpacePerPixel, displaySurface, fpsClock
 
-pixelWidth, deadSpacePerPixel, displaySurface, fpsClock = config(screenResolution)
+screenResolution, pixelWidth, deadSpacePerPixel, displaySurface, fpsClock = config(screenResolution)
+
+# color palette screen resolution aftr the screenresolution was configured to avoid incorrect variables
+colorPaletteDimensions = [rgbSliderDimensions[0]+deadSpaceAtStartForRGBSliders+deadSpaceColorPalette, screenResolution[1]-screenResolutionForColors[1]]
 
 #-------------------------
 # MAIN CODE
@@ -107,10 +121,38 @@ def main():
     colorSliderList[1].color = (0, 160 ,0)
     colorSliderList[2].color = (0, 0, 160)
 
+    # get the colorpalette.json imported
+    colorPaletteList = [Object([colorPaletteDimensions[0], colorPaletteDimensions[1]], [colorPaletteWidth, colorPaletteWidth], displaySurface, 'rectangle', BLACK)]
+    colorPaletteList[0].addCollider()
+    if isThereAColorPalette:
+        jsonPalette = open(colorPaletteName, 'r')
+        colorPalette = json.load(jsonPalette)
+        for index, color in enumerate(colorPalette):
+            colorPaletteList.append(Object(
+                position= [colorPaletteDimensions[0]+colorPaletteWidth*(index+1), colorPaletteDimensions[1]],
+                dimension= [colorPaletteWidth, colorPaletteWidth],
+                displaySurface= displaySurface,
+                objType= 'rectangle',
+                color= (colorPalette[color][0]*colorMultiplier, colorPalette[color][1]*colorMultiplier, colorPalette[color][2]*colorMultiplier)))
+            colorPaletteList[index+1].addCollider()
+    
+    recentColors = [(0,0,0)]
+    for color in range(recentColorAmount):
+        pass
+
     mouseDown = False
     mouseDownDelay = False
     selectedColor = (0,0,0)
+    # main loop function
     while True:
+
+        # add new color to recent color if color has changed in the past frame.
+        if recentColors[-1] != selectedColor:
+            recentColors.append(selectedColor)
+
+        # check if recentColors is too long
+        if len(recentColors) > recentColorAmount-1:
+            del(recentColors[0])
 
         # draw pixel grid
         for row in pixelGrid:
@@ -121,16 +163,19 @@ def main():
         for slider in colorSliderList:
             slider.drawObject()
 
+        # draw color palette rectangles
+        for color in colorPaletteList:
+            color.drawObject()
 
         # mouse down continuous
         if mouseDown:
             # Change selected color if sliders have been changed.
-            selectedColor = ()
             for slider in colorSliderList:
                 if slider.collider.checkForMouseCollision(event.dict):
                     slider.slider.center = (event.dict['pos'][0], slider.slider.center[1])
-            selectedColor = (colorSliderList[0].slider.currentValue * colorMultiplier, colorSliderList[1].slider.currentValue * colorMultiplier, colorSliderList[2].slider.currentValue * colorMultiplier)
-        
+                    selectedColor = (colorSliderList[0].slider.currentValue * colorMultiplier, colorSliderList[1].slider.currentValue * colorMultiplier, colorSliderList[2].slider.currentValue * colorMultiplier)
+                    colorPaletteList[0].color =  selectedColor
+
             # Change color of pixel if pixel has been pressed.
             for row in pixelGrid:
                 for pixel in row:
@@ -141,7 +186,9 @@ def main():
         if mouseDown != mouseDownDelay and mouseDown == True:
             mouseDownDelay = mouseDown
             
-            pass
+            for color in colorPaletteList:
+                if color.collider.checkForMouseCollision(event.dict):
+                    selectedColor = (color.color[0], color.color[1], color.color[2])
                 
 
         # event handling
