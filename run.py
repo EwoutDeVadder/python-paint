@@ -52,6 +52,8 @@ deadSpaceColorPalette = 20
 
 colorPaletteWidth = 50
 
+colorPickerDeadSpace = 10
+
 def config(screenResolution):
     minimumScreenResolution = [800, 400]
     # configuring screen height , width
@@ -136,9 +138,16 @@ def main():
                 color= (colorPalette[color][0]*colorMultiplier, colorPalette[color][1]*colorMultiplier, colorPalette[color][2]*colorMultiplier)))
             colorPaletteList[index+1].addCollider()
     
-    recentColors = [(0,0,0)]
-    for color in range(recentColorAmount):
-        pass
+    recentColors = []
+    for index in range(recentColorAmount):
+        recentColors.append(Object(
+            position= [colorPaletteDimensions[0]+colorPaletteWidth*(index), colorPaletteDimensions[1]+colorPaletteWidth+colorPickerDeadSpace],
+            dimension= [colorPaletteWidth, colorPaletteWidth],
+            displaySurface= displaySurface,
+            objType= 'rectangle',
+            color= BLACK
+        ))
+        recentColors[index].addCollider()
 
     mouseDown = False
     mouseDownDelay = False
@@ -146,13 +155,9 @@ def main():
     # main loop function
     while True:
 
-        # add new color to recent color if color has changed in the past frame.
-        if recentColors[-1] != selectedColor:
-            recentColors.append(selectedColor)
-
-        # check if recentColors is too long
-        if len(recentColors) > recentColorAmount-1:
-            del(recentColors[0])
+        # draw recent colors
+        for color in recentColors:
+            color.drawObject()
 
         # draw pixel grid
         for row in pixelGrid:
@@ -182,6 +187,12 @@ def main():
                     if pixel.collider.checkForMouseCollision(event.dict):
                         pixel.color = selectedColor
 
+                        # change recent color and select noew ones
+                        if recentColors[0].color != selectedColor:
+                            for index, color in enumerate(recentColors):
+                                recentColors[len(recentColors)-index-1].color = recentColors[len(recentColors)-index-2].color
+                            recentColors[0].color = selectedColor
+
         # mouse down once
         if mouseDown != mouseDownDelay and mouseDown == True:
             mouseDownDelay = mouseDown
@@ -189,6 +200,10 @@ def main():
             for color in colorPaletteList:
                 if color.collider.checkForMouseCollision(event.dict):
                     selectedColor = (color.color[0], color.color[1], color.color[2])
+            
+            for color in recentColors:
+                if color.collider.checkForMouseCollision(event.dict):
+                    selectedColor = color.color
                 
 
         # event handling
