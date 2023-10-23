@@ -18,7 +18,7 @@ fullscreen = False
 # A minimum of atleast 800x400 is required
 screenResolution = [1600, 800]
 
-screenResolutionForColors = [0, 200]
+screenResolutionForColors = [100, 200]
 
 # percentage of screen what should be dead space. FOR THE WIDTH AND HEIGHT
 deadSpaceBetweenGrid = 0.2
@@ -53,6 +53,9 @@ deadSpaceColorPalette = 20
 colorPaletteWidth = 50
 
 colorPickerDeadSpace = 10
+
+screenResolutionForButtons = [200, 0, 10]
+buttonDimensions = [100,50]
 
 def config(screenResolution):
     minimumScreenResolution = [800, 400]
@@ -112,9 +115,10 @@ def main():
             dimension= rgbSliderDimensions,
             displaySurface= displaySurface,
             objType= 'slider',
-            color= WHITE
+            color= WHITE,
+            sliderDimension= 15,
+            sliderValueRange= [0, 15]
         ))
-        colorSliderList[index].addComponentByType(13)
         colorSliderList[index].addAccentColor(GREY)
         colorSliderList[index].addCollider()
 
@@ -138,6 +142,7 @@ def main():
                 color= (colorPalette[color][0]*colorMultiplier, colorPalette[color][1]*colorMultiplier, colorPalette[color][2]*colorMultiplier)))
             colorPaletteList[index+1].addCollider()
     
+    # recent colors configuration
     recentColors = []
     for index in range(recentColorAmount):
         recentColors.append(Object(
@@ -148,6 +153,21 @@ def main():
             color= BLACK
         ))
         recentColors[index].addCollider()
+
+    # load save and load buttons
+    optionButtons = []
+    buttons = ['save', 'load', 'settings']
+    for index, string in enumerate(buttons):
+        optionButtons.append(Object(
+            position= (screenResolution[0]-screenResolutionForButtons[0], (screenResolutionForButtons[1]+screenResolutionForButtons[2]+buttonDimensions[1])*index),
+            dimension= (buttonDimensions),
+            displaySurface= displaySurface,
+            objType= 'text',
+            color= GREY,
+            string= string
+        ))
+        optionButtons[index].addAccentColor(WHITE)
+        optionButtons[index].addCollider()
 
     mouseDown = False
     mouseDownDelay = False
@@ -171,6 +191,10 @@ def main():
         # draw color palette rectangles
         for color in colorPaletteList:
             color.drawObject()
+
+        # draw buttons
+        for button in optionButtons:
+            button.drawObject()
 
         # mouse down continuous
         if mouseDown:
@@ -204,7 +228,17 @@ def main():
             for color in recentColors:
                 if color.collider.checkForMouseCollision(event.dict):
                     selectedColor = color.color
-                
+
+            for index, button in enumerate(optionButtons):
+                if button.collider.checkForMouseCollision(event.dict):
+                    if button.string == 'save':
+                        print(button.string)
+
+                    if button.string == 'load':
+                        print(button.string)
+
+                    if button.string == 'settings':
+                        print(button.string)
 
         # event handling
         for event in pygame.event.get():
