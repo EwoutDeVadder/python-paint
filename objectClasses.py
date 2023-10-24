@@ -153,6 +153,18 @@ class MatrixData:
         self.num_frames = self.dict['num_frames']
         self.mode = self.dict['mode']
         self.frames = self.dict['frames']
+        
+        return self.decodeFrames()
     def loadJson(self):
         with open('save.json', 'r') as json_file:
             self.dict = json.load(json_file)
+    
+    def decodeFrames(self):
+        newList = []
+        rows = round(len(self.frames)/self.x_dim)
+        if self.mode == 0:
+            for x in range(self.x_dim):
+                for y in range(self.y_dim):
+                    newList.append(self.dict['frames'][x+rows*y])
+                    print(x+rows*y)
+        return newList

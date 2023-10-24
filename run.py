@@ -1,4 +1,3 @@
-#-------------------------
 # LIBRARIES
 #-------------------------
 import pygame
@@ -12,7 +11,7 @@ from objectClasses import *
 # GLOBAL VARIABLES
 #-------------------------
 
-drawingGrid = [16, 16]
+drawingGrid = [5, 5]
 
 fullscreen = False
 # A minimum of atleast 800x400 is required
@@ -237,10 +236,13 @@ def main():
                         matrix.exportData(pixelGrid)
 
                     if button.string == 'load':
-                        #matrix.importData()
-                        #drawingGrid = [matrix.x_dim, matrix.y_dim]
-                        #colorMultiplier = matrix.brightness
-                        pass
+                        colorList = matrix.importData()
+                        if [matrix.x_dim, matrix.y_dim] == drawingGrid:
+                            i = 0
+                            for row in pixelGrid:
+                                for pixel in row:
+                                    pixel.color = colorList[i]
+                                    i += 1
 
                     if button.string == 'settings':
                         print(button.string)
