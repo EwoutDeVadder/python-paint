@@ -218,7 +218,6 @@ class MatrixData:
                     break
                 else:
                     index += 1
-        print(frames)
 
 class LoadButtonHandler:
     def __init__(self,mode) -> None:

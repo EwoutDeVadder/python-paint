@@ -58,7 +58,7 @@ screenResolutionForButtons = [200, 0, 10]
 buttonDimensions = [100,50]
 
 def config(screenResolution):
-    minimumScreenResolution = [800, 400]
+    minimumScreenResolution = [1200, 600]
     # configuring screen height , width
     if fullscreen:
         screenResolution = pygame.display.list_modes()[0]
@@ -169,6 +169,8 @@ def main():
         optionButtons[index].addAccentColor(WHITE)
         optionButtons[index].addCollider()
 
+    matrix = MatrixData(drawingGrid[0], drawingGrid[1], colorMultiplier, mode=0)
+
     mouseDown = False
     mouseDownDelay = False
     selectedColor = (0,0,0)
@@ -232,10 +234,13 @@ def main():
             for index, button in enumerate(optionButtons):
                 if button.collider.checkForMouseCollision(event.dict):
                     if button.string == 'save':
-                        print(button.string)
+                        matrix.exportData(pixelGrid)
 
                     if button.string == 'load':
-                        print(button.string)
+                        #matrix.importData()
+                        #drawingGrid = [matrix.x_dim, matrix.y_dim]
+                        #colorMultiplier = matrix.brightness
+                        pass
 
                     if button.string == 'settings':
                         print(button.string)
