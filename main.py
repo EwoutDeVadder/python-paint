@@ -4,8 +4,10 @@ pygame.init()
 import sys
 from pygame.locals import *
 import json
-#  ---------------------------
-pixelDimentions = [6, 6]
+# ---------------------------
+# CONFIGURATION VARIABLES
+# ---------------------------
+pixelDimentions = [16, 16]
 spaceBetween = 0.1
 pixel_width = 50
 
@@ -16,7 +18,7 @@ slider_height = 50
 sliderExtraHeight = 2
 slidersOffset = 30
 
-fullscreenMode = False
+fullscreenMode = True
 
 colorPickerHeight = 150
 
@@ -24,7 +26,7 @@ customColorPalette = True
 colorPaletteName = "color_palette.json"
 colorPalette = 0
 colorPaletteOffset = 10
-colorPaletteWidth = pixel_width
+colorPaletteWidth = 50
 
 recentColorsAmount = 5
 
@@ -37,6 +39,8 @@ modeSelect = ['rij-per-rij']
 mode = modeSelect[0]
 
 extraWidth = slider_width+colorPaletteWidth*2
+
+# ---------------------------
 
 if customColorPalette:
     json_palette = open(colorPaletteName)
@@ -214,26 +218,26 @@ class MatrixData:
                     break
                 else:
                     index += 1
-    
-    def packAll(self):
-        self.packed = json.dumps({
-            'x_dim': self.x_dim,
-            'y_dim': self.y_dim,
-            'brightness': self.brightness,
-            'frame_time': self.frame_time,
-            'num_frames': self.num_frames,
-            'mode': self.mode,
-            'frames': self.frames
-        })
-
-    def save(self):
-        f = open('untitled.json', 'w')
-        f.write(self.packed)
-
 
 class LoadButtonHandler:
-    def __init__(self) -> None:
-        pass
+    def __init__(self,mode) -> None:
+        self.mode = mode
+
+    def unpack(self, file):
+        jsonfile = open(file, 'r')
+        pixelList = []
+        rowList = []
+
+        if jsonfile['mode'] == 'rij-per-rij':
+            while True:
+                index = 0
+                for x in range(jsonfile['x_dim']):
+                    rowList.append(jsonfile['frames'][x*(index+1)])
+                pixelList.append(rowList)
+                if index > jsonfile['y_dim']-1:
+                    return pixelList
+                index += 1
+
 
 def settings():
     return
