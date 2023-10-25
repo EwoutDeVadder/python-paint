@@ -72,7 +72,7 @@ def config(screenResolution):
     if pixelWidth*screenResolutionForPixels[1] > screenResolution[1]:
         pixelWidth = (screenResolutionForPixels[1]-screenResolutionForPixels[1]*deadSpaceBetweenGrid)/drawingGrid[1]
     
-    deadSpacePerPixel = screenResolutionForPixels[1]*deadSpaceBetweenGrid/pixelWidth
+    deadSpacePerPixel = round(screenResolutionForPixels[1]*deadSpaceBetweenGrid/pixelWidth)
 
     # configuring the display surface, fps clock
     displaySurface = pygame.display.set_mode((screenResolution[0], screenResolution[1]))

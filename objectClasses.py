@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import json
+from tkinter import filedialog as fd
 
 #
 # OBJECT CLASS
@@ -141,7 +142,10 @@ class MatrixData:
         }
 
     def saveJson(self):
-        with open('save.json', 'w') as json_file:
+        file  = fd.asksaveasfile(filetypes=[['json file','*.json']], defaultextension=[['json file','*.json']])
+        if file == None:
+            return
+        with open(file.name, 'w') as json_file:
             json.dump(self.dict, json_file)
 
     def importData(self):
@@ -155,8 +159,12 @@ class MatrixData:
         self.frames = self.dict['frames']
         
         return self.decodeFrames()
+    
     def loadJson(self):
-        with open('save.json', 'r') as json_file:
+        file  = fd.askopenfile(filetypes=[['json file','*.json']])
+        if file == None:
+            return
+        with open(file.name, 'r') as json_file:
             self.dict = json.load(json_file)
     
     def decodeFrames(self):
@@ -166,5 +174,4 @@ class MatrixData:
             for x in range(self.x_dim):
                 for y in range(self.y_dim):
                     newList.append(self.dict['frames'][x+rows*y])
-                    print(x+rows*y)
         return newList
