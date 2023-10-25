@@ -11,10 +11,10 @@ from objectClasses import *
 # GLOBAL VARIABLES
 #-------------------------
 
-drawingGrid = [5, 5]
+drawingGrid = [3, 3]
 
 fullscreen = False
-# A minimum of atleast 800x400 is required
+# A minimum of atleast 1200x600 is required
 screenResolution = [1600, 800]
 
 screenResolutionForColors = [100, 200]
@@ -34,13 +34,17 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (122, 122, 122)
 
-colorMultiplier = 17
-
 BGCOLOR = BLACK
 
 #-------------------------
 # BASIC CONFIGURATIONS AND CHECKS
 #-------------------------
+
+matrix = MatrixData(drawingGrid[0], drawingGrid[1], brightness=255, mode=1)
+# making initial clear screen matrix
+for x in range(matrix.x_dim):
+    for y in range(matrix.y_dim):
+        matrix.colorList.append(WHITE)
 
 deadSpaceAtStartForRGBSliders = 20
 
@@ -56,53 +60,57 @@ colorPickerDeadSpace = 10
 screenResolutionForButtons = [200, 0, 10]
 buttonDimensions = [100,50]
 
-def config(screenResolution):
-    minimumScreenResolution = [1200, 600]
-    # configuring screen height , width
-    if fullscreen:
-        screenResolution = pygame.display.list_modes()[0]
-
-    elif screenResolution[0] < minimumScreenResolution[0] or screenResolution[1] < minimumScreenResolution[1]:
+minimumScreenResolution = [1200, 600]
+# configuring screen height , width
+if fullscreen:
+    screenResolution = pygame.display.list_modes()[0]
+elif screenResolution[0] < minimumScreenResolution[0] or screenResolution[1] < minimumScreenResolution[1]:
         print("ERR: RESOLUTION WAS NOT CONFIGURED PROPERLY, STANDARD RESOLUTION HAS BEEN USED INSTEAD.")
         screenResolution = minimumScreenResolution
-    
+
+# configuring the display surface, fps clock
+displaySurface = pygame.display.set_mode((screenResolution[0], screenResolution[1]))
+fpsClock = pygame.time.Clock()
+
+def config(screenResolution):
     # configuring pixel_width and deadspace according to screen-width and height
     screenResolutionForPixels = [screenResolution[0]-screenResolutionForColors[0], screenResolution[1]-screenResolutionForColors[1]]
-    pixelWidth = (screenResolutionForPixels[0]-screenResolutionForPixels[0]*deadSpaceBetweenGrid)/drawingGrid[0]
+    pixelWidth = (screenResolutionForPixels[0]-screenResolutionForPixels[0]*deadSpaceBetweenGrid)/matrix.x_dim
     if pixelWidth*screenResolutionForPixels[1] > screenResolution[1]:
-        pixelWidth = (screenResolutionForPixels[1]-screenResolutionForPixels[1]*deadSpaceBetweenGrid)/drawingGrid[1]
+        pixelWidth = (screenResolutionForPixels[1]-screenResolutionForPixels[1]*deadSpaceBetweenGrid)/matrix.y_dim
     
     deadSpacePerPixel = round(screenResolutionForPixels[1]*deadSpaceBetweenGrid/pixelWidth)
 
-    # configuring the display surface, fps clock
-    displaySurface = pygame.display.set_mode((screenResolution[0], screenResolution[1]))
-    fpsClock = pygame.time.Clock()
     # return some nessesary values for other parts of the code
-    return screenResolution, pixelWidth, deadSpacePerPixel, displaySurface, fpsClock
+    return pixelWidth, deadSpacePerPixel
 
-screenResolution, pixelWidth, deadSpacePerPixel, displaySurface, fpsClock = config(screenResolution)
-
-# color palette screen resolution aftr the screenresolution was configured to avoid incorrect variables
-colorPaletteDimensions = [rgbSliderDimensions[0]+deadSpaceAtStartForRGBSliders+deadSpaceColorPalette, screenResolution[1]-screenResolutionForColors[1]]
 
 #-------------------------
 # MAIN CODE
 #-------------------------
 
 def main():
+    
+    pixelWidth, deadSpacePerPixel = config(screenResolution)
+
+    # color palette screen resolution aftr the screenresolution was configured to avoid incorrect variables
+    colorPaletteDimensions = [rgbSliderDimensions[0]+deadSpaceAtStartForRGBSliders+deadSpaceColorPalette, screenResolution[1]-screenResolutionForColors[1]]
+
     # drawing the pixel grid
     pixelGrid = []
-    for x_pixel in range(drawingGrid[0]):
+    colorIndex = 0
+    for x_pixel in range(matrix.x_dim):
         y_pixels = []
-        for y_pixel in range(drawingGrid[1]):
+        for y_pixel in range(matrix.y_dim):
             y_pixels.append(Object(
                 position= ((pixelWidth+deadSpacePerPixel)*x_pixel+deadSpacePerPixel, (pixelWidth+deadSpacePerPixel)*y_pixel+deadSpacePerPixel),
                 dimension= (pixelWidth, pixelWidth),
                 displaySurface= displaySurface,
                 objType= 'rectangle',
-                color= WHITE
-            ))
+                color= matrix.colorList[colorIndex]
+                ))
             y_pixels[y_pixel].addCollider()
+            colorIndex += 1
 
         pixelGrid.append(y_pixels)
 
@@ -116,7 +124,7 @@ def main():
             objType= 'slider',
             color= WHITE,
             sliderDimension= 15,
-            sliderValueRange= [0, 15]
+            sliderValueRange= [0, 255]
         ))
         colorSliderList[index].addAccentColor(GREY)
         colorSliderList[index].addCollider()
@@ -138,7 +146,7 @@ def main():
                 dimension= [colorPaletteWidth, colorPaletteWidth],
                 displaySurface= displaySurface,
                 objType= 'rectangle',
-                color= (colorPalette[color][0]*colorMultiplier, colorPalette[color][1]*colorMultiplier, colorPalette[color][2]*colorMultiplier)))
+                color= (colorPalette[color][0], colorPalette[color][1], colorPalette[color][2])))
             colorPaletteList[index+1].addCollider()
     
     # recent colors configuration
@@ -167,8 +175,6 @@ def main():
         ))
         optionButtons[index].addAccentColor(WHITE)
         optionButtons[index].addCollider()
-
-    matrix = MatrixData(drawingGrid[0], drawingGrid[1], colorMultiplier, mode=0)
 
     mouseDown = False
     mouseDownDelay = False
@@ -203,7 +209,7 @@ def main():
             for slider in colorSliderList:
                 if slider.collider.checkForMouseCollision(event.dict):
                     slider.slider.center = (event.dict['pos'][0], slider.slider.center[1])
-                    selectedColor = (colorSliderList[0].slider.currentValue * colorMultiplier, colorSliderList[1].slider.currentValue * colorMultiplier, colorSliderList[2].slider.currentValue * colorMultiplier)
+                    selectedColor = (colorSliderList[0].slider.currentValue, colorSliderList[1].slider.currentValue, colorSliderList[2].slider.currentValue)
                     colorPaletteList[0].color =  selectedColor
 
             # Change color of pixel if pixel has been pressed.
@@ -236,13 +242,8 @@ def main():
                         matrix.exportData(pixelGrid)
 
                     if button.string == 'load':
-                        colorList = matrix.importData()
-                        if [matrix.x_dim, matrix.y_dim] == drawingGrid:
-                            i = 0
-                            for row in pixelGrid:
-                                for pixel in row:
-                                    pixel.color = colorList[i]
-                                    i += 1
+                        matrix.importData()
+                        main()
 
                     if button.string == 'settings':
                         print(button.string)

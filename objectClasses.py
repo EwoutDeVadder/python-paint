@@ -112,6 +112,7 @@ class MatrixData:
         self.mode = mode
         self.frames = []
         self.dict = {}
+        self.colorList = []
     
     def exportData(self, rectList):
         # reset frame to pack new one.
@@ -126,6 +127,31 @@ class MatrixData:
                 if index == len(rectList)-1:
                     break
                 index += 1
+        if self.mode == 1:
+            x_index = 0
+            y_index = 0
+            goBackwards = False
+            while True:
+                self.frames.append(rectList[x_index][y_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.x_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index += 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index += 1
+
+                if y_index >= self.y_dim:
+                    break
+
         
         self.makeDictionary()       
         self.saveJson() 
@@ -141,31 +167,20 @@ class MatrixData:
             'frames': self.frames
         }
 
-    def saveJson(self):
-        file  = fd.asksaveasfile(filetypes=[['json file','*.json']], defaultextension=[['json file','*.json']])
-        if file == None:
-            return
-        with open(file.name, 'w') as json_file:
-            json.dump(self.dict, json_file)
-
     def importData(self):
         self.loadJson()
-        self.x_dim = self.dict['x_dim']
-        self.y_dim = self.dict['y_dim']
-        self.brightness = self.dict['brightness']
-        self.frame_time = self.dict['frame_time']
-        self.num_frames = self.dict['num_frames']
-        self.mode = self.dict['mode']
-        self.frames = self.dict['frames']
+        try:
+            self.x_dim = self.dict['x_dim']
+            self.y_dim = self.dict['y_dim']
+            self.brightness = self.dict['brightness']
+            self.frame_time = self.dict['frame_time']
+            self.num_frames = self.dict['num_frames']
+            self.mode = self.dict['mode']
+            self.frames = self.dict['frames']
+        except :
+            raise TypeError(f'Opened wrong type of file. Opened file is not an image or gif with the right values.') 
         
-        return self.decodeFrames()
-    
-    def loadJson(self):
-        file  = fd.askopenfile(filetypes=[['json file','*.json']])
-        if file == None:
-            return
-        with open(file.name, 'r') as json_file:
-            self.dict = json.load(json_file)
+        self.decodeFrames()
     
     def decodeFrames(self):
         newList = []
@@ -174,4 +189,53 @@ class MatrixData:
             for x in range(self.x_dim):
                 for y in range(self.y_dim):
                     newList.append(self.dict['frames'][x+rows*y])
-        return newList
+        if self.mode == 1:
+            itemlist = []
+            index = 0
+            x_index = 0
+            lock = False
+            for x in range(self.x_dim):
+                    itemlist.append([])
+            while True:
+                for x in range(self.x_dim):
+                    itemlist[x_index].append(self.dict['frames'][index])
+                    index += 1
+
+                if lock:
+                    x_index -= 1
+                else:
+                    x_index += 1
+
+                if x_index > self.x_dim:
+                    lock = True
+                    x_index -= 1
+                elif x_index < 0:
+                    lock = False
+                    x_index += 1
+
+                if index == (self.y_dim*self.x_dim):
+                    print(itemlist)
+                    break
+            for list in itemlist:
+                for item in list:
+                    newList.append(item)
+                                
+        self.colorList = newList
+    
+    def saveJson(self):
+        file  = fd.asksaveasfile(filetypes=[['json file','*.json']], defaultextension=[['json file','*.json']])
+        if file == None:
+            return
+        try:
+            with open(file.name, 'w') as json_file:
+                json.dump(self.dict, json_file)
+        except :
+            raise TypeError(f'Something went wrong. Please issue a bug to https://github.com/EwoutDeVadder/python-paint/issues') 
+            
+
+    def loadJson(self):
+        file  = fd.askopenfile(filetypes=[['json file','*.json']])
+        if file == None:
+            return
+        with open(file.name, 'r') as json_file:
+            self.dict = json.load(json_file)
