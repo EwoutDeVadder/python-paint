@@ -163,7 +163,7 @@ def main():
 
     # load save and load buttons
     optionButtons = []
-    buttons = ['save', 'load', 'settings']
+    buttons = ['save', 'load', 'settings', 'reset grid']
     for index, string in enumerate(buttons):
         optionButtons.append(Object(
             position= (screenResolution[0]-screenResolutionForButtons[0], (screenResolutionForButtons[1]+screenResolutionForButtons[2]+buttonDimensions[1])*index),
@@ -247,6 +247,11 @@ def main():
 
                     if button.string == 'settings':
                         print(button.string)
+
+                    if button.string == 'reset grid':
+                        for color in matrix.colorList:
+                            color = WHITE
+                        main()
 
         # event handling
         for event in pygame.event.get():

@@ -127,6 +127,7 @@ class MatrixData:
                 if index == len(rectList)-1:
                     break
                 index += 1
+
         if self.mode == 1:
             x_index = 0
             y_index = 0
@@ -150,6 +151,182 @@ class MatrixData:
                     y_index += 1
 
                 if y_index >= self.y_dim:
+                    break
+
+
+        if self.mode == 2:
+            x_index = 0
+            y_index = 0
+            goBackwards = False
+            while True:
+                self.frames.append(rectList[y_index][x_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.y_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index += 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index += 1
+
+                if y_index >= self.x_dim:
+                    break
+
+        if self.mode == 3:
+            x_index = self.x_dim-1
+            y_index = 0
+            goBackwards = True
+            while True:
+                self.frames.append(rectList[x_index][y_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.x_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index += 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index += 1
+
+                if y_index >= self.y_dim:
+                    break
+        
+        if self.mode == 4:
+            x_index = 0
+            y_index = self.y_dim-1
+            goBackwards = False
+            while True:
+                self.frames.append(rectList[y_index][x_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.y_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index -= 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index -= 1
+
+                if y_index < 0:
+                    break
+        
+        if self.mode == 5:
+            x_index = 0
+            y_index = self.y_dim-1
+            goBackwards = False
+            while True:
+                self.frames.append(rectList[x_index][y_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.x_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index -= 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index -= 1
+
+                if y_index < 0:
+                    break
+
+        if self.mode == 6:
+            x_index = self.x_dim-1
+            y_index = 0
+            goBackwards = True
+            while True:
+                self.frames.append(rectList[y_index][x_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.y_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index += 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index += 1
+
+                if y_index >= self.x_dim:
+                    break
+
+        if self.mode == 7:
+            x_index = self.x_dim-1
+            y_index = self.y_dim-1
+            goBackwards = True
+            while True:
+                self.frames.append(rectList[x_index][y_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.x_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index -= 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index -= 1
+
+                if y_index < 0:
+                    break
+
+        if self.mode == 8:
+            x_index = self.x_dim-1
+            y_index = self.y_dim-1
+            goBackwards = True
+            while True:
+                self.frames.append(rectList[y_index][x_index].color)
+                if goBackwards:
+                    x_index -= 1
+                else:
+                    x_index += 1
+                
+                if x_index >= self.y_dim:
+                    x_index -= 1
+                    goBackwards = True
+
+                    y_index -= 1
+                elif x_index < 0:
+                    x_index += 1
+                    goBackwards = False
+
+                    y_index -= 1
+
+                if y_index < 0:
                     break
 
         
