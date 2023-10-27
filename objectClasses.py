@@ -124,7 +124,7 @@ class MatrixData:
             while True:
                 for row in rectList:
                     self.frames.append(row[index].color)
-                if index == len(rectList)-1:
+                if index == self.y_dim-1:
                     break
                 index += 1
 
@@ -361,42 +361,19 @@ class MatrixData:
     
     def decodeFrames(self):
         newList = []
-        rows = round(len(self.frames)/self.x_dim)
         if self.mode == 0:
-            for x in range(self.x_dim):
-                for y in range(self.y_dim):
-                    newList.append(self.dict['frames'][x+rows*y])
-        if self.mode == 1:
-            itemlist = []
             index = 0
-            x_index = 0
-            lock = False
-            for x in range(self.x_dim):
-                    itemlist.append([])
             while True:
-                for x in range(self.x_dim):
-                    itemlist[x_index].append(self.dict['frames'][index])
-                    index += 1
+                for row in range(self.y_dim):
+                    newList.append(self.dict['frames'][index+(self.x_dim*row)])
+                index += 1
 
-                if lock:
-                    x_index -= 1
-                else:
-                    x_index += 1
-
-                if x_index > self.x_dim:
-                    lock = True
-                    x_index -= 1
-                elif x_index < 0:
-                    lock = False
-                    x_index += 1
-
-                if index == (self.y_dim*self.x_dim):
-                    print(itemlist)
+                if index > self.x_dim-1:
                     break
-            for list in itemlist:
-                for item in list:
-                    newList.append(item)
-                                
+
+        if self.mode == 1:
+            pass
+
         self.colorList = newList
     
     def saveJson(self):

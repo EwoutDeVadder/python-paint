@@ -11,16 +11,16 @@ from objectClasses import *
 # GLOBAL VARIABLES
 #-------------------------
 
-drawingGrid = [3, 3]
+drawingGrid = [30, 30]
 
-fullscreen = False
+fullscreen = True
 # A minimum of atleast 1200x600 is required
-screenResolution = [1600, 800]
+screenResolution = [1800, 1200]
 
 screenResolutionForColors = [100, 200]
 
 # percentage of screen what should be dead space. FOR THE WIDTH AND HEIGHT
-deadSpaceBetweenGrid = 0.2
+deadSpaceBetweenGrid = 0.1
 
 # is there a color_palette.json in the directory
 isThereAColorPalette = True
@@ -40,7 +40,7 @@ BGCOLOR = BLACK
 # BASIC CONFIGURATIONS AND CHECKS
 #-------------------------
 
-matrix = MatrixData(drawingGrid[0], drawingGrid[1], brightness=255, mode=1)
+matrix = MatrixData(drawingGrid[0], drawingGrid[1], brightness=255, mode=0)
 # making initial clear screen matrix
 for x in range(matrix.x_dim):
     for y in range(matrix.y_dim):
