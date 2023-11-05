@@ -19,6 +19,10 @@ screenResolution = [1800, 1200]
 
 screenResolutionForColors = [200, 400]
 
+# mode to save to
+# ( all are implemented but the program can only load mode 0.)
+saveMode = 0
+
 # percentage of screen what should be dead space. FOR THE WIDTH AND HEIGHT
 deadSpaceBetweenGrid = 0.1
 
@@ -40,7 +44,7 @@ BGCOLOR = BLACK
 # BASIC CONFIGURATIONS AND CHECKS
 #-------------------------
 
-matrix = MatrixData(drawingGrid[0], drawingGrid[1], brightness=255, mode=0)
+matrix = MatrixData(drawingGrid[0], drawingGrid[1], brightness=255, mode=saveMode)
 # making initial clear screen matrix
 for x in range(matrix.x_dim):
     for y in range(matrix.y_dim):
