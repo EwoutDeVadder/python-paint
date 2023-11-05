@@ -11,13 +11,13 @@ from objectClasses import *
 # GLOBAL VARIABLES
 #-------------------------
 
-drawingGrid = [30, 30]
+drawingGrid = [64, 32]
 
-fullscreen = True
+fullscreen = False
 # A minimum of atleast 1200x600 is required
 screenResolution = [1800, 1200]
 
-screenResolutionForColors = [100, 200]
+screenResolutionForColors = [200, 400]
 
 # percentage of screen what should be dead space. FOR THE WIDTH AND HEIGHT
 deadSpaceBetweenGrid = 0.1
@@ -75,11 +75,15 @@ fpsClock = pygame.time.Clock()
 def config(screenResolution):
     # configuring pixel_width and deadspace according to screen-width and height
     screenResolutionForPixels = [screenResolution[0]-screenResolutionForColors[0], screenResolution[1]-screenResolutionForColors[1]]
-    pixelWidth = (screenResolutionForPixels[0]-screenResolutionForPixels[0]*deadSpaceBetweenGrid)/matrix.x_dim
-    if pixelWidth*screenResolutionForPixels[1] > screenResolution[1]:
-        pixelWidth = (screenResolutionForPixels[1]-screenResolutionForPixels[1]*deadSpaceBetweenGrid)/matrix.y_dim
-    
-    deadSpacePerPixel = round(screenResolutionForPixels[1]*deadSpaceBetweenGrid/pixelWidth)
+    print(screenResolutionForPixels, screenResolution)
+    #pixelWidth = (screenResolutionForPixels[0]-screenResolutionForPixels[0]*deadSpaceBetweenGrid)/matrix.x_dim
+    #deadSpacePerPixel = round(screenResolutionForPixels[1]*deadSpaceBetweenGrid/pixelWidth)
+    pixelWidth = ((screenResolutionForPixels[1]/drawingGrid[1]-(screenResolutionForPixels[1]/drawingGrid[1])*deadSpaceBetweenGrid))
+    deadSpacePerPixel = (round((screenResolutionForPixels[1]/drawingGrid[1])*deadSpaceBetweenGrid))
+    if pixelWidth*drawingGrid[0] > screenResolutionForPixels[0]:
+        pixelWidth = ((screenResolutionForPixels[0]/drawingGrid[0]-(screenResolutionForPixels[0]/drawingGrid[0])*deadSpaceBetweenGrid))
+        print(pixelWidth)
+        deadSpacePerPixel = (round((screenResolutionForPixels[0]/drawingGrid[0])*deadSpaceBetweenGrid))
 
     # return some nessesary values for other parts of the code
     return pixelWidth, deadSpacePerPixel
