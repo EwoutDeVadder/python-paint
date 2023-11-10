@@ -11,13 +11,13 @@ from objectClasses import *
 # GLOBAL VARIABLES
 #-------------------------
 
-drawingGrid = [64, 32]
+drawingGrid = [16, 16]
 
 fullscreen = False
 # A minimum of atleast 1200x600 is required
-screenResolution = [1800, 1200]
+screenResolution = [1600, 800]
 
-screenResolutionForColors = [200, 400]
+screenResolutionForColors = [200, 250]
 
 # mode to save to
 # ( all are implemented but the program can only load mode 0.)
@@ -89,9 +89,20 @@ def config(screenResolution):
         print(pixelWidth)
         deadSpacePerPixel = (round((screenResolutionForPixels[0]/drawingGrid[0])*deadSpaceBetweenGrid))
 
-    # return some nessesary values for other parts of the code
-    return pixelWidth, deadSpacePerPixel
+    # configuring the display surface, fps clock
+    displaySurface = pygame.display.set_mode((screenResolution[0], screenResolution[1]))
+    fpsClock = pygame.time.Clock()
 
+    # return some nessesary values for other parts of the code
+    return pixelWidth, deadSpacePerPixel, displaySurface, fpsClock
+
+#-------------------------
+# SETTINGS CONFIGURATION
+#-------------------------
+
+settingsTextDimensions = [200,50]
+settingsTextStartingPosition = [100,100]
+settingsTextOffset = [500 ,50]
 
 #-------------------------
 # MAIN CODE
@@ -99,7 +110,7 @@ def config(screenResolution):
 
 def main():
     
-    pixelWidth, deadSpacePerPixel = config(screenResolution)
+    pixelWidth, deadSpacePerPixel, displaySurface, fpsClock = config(screenResolution)
 
     # color palette screen resolution aftr the screenresolution was configured to avoid incorrect variables
     colorPaletteDimensions = [rgbSliderDimensions[0]+deadSpaceAtStartForRGBSliders+deadSpaceColorPalette, screenResolution[1]-screenResolutionForColors[1]]
@@ -254,7 +265,7 @@ def main():
                         main()
 
                     if button.string == 'settings':
-                        print(button.string)
+                        settings()
 
                     if button.string == 'reset grid':
                         for color in matrix.colorList:
@@ -270,6 +281,102 @@ def main():
             if event.type == MOUSEBUTTONUP:
                 mouseDown = False
                 mouseDownDelay = False
+
+        # Clear the screen and prepare the following frame
+        pygame.display.update()
+        displaySurface.fill(BGCOLOR)
+        fpsClock.tick(0)
+
+def settings():
+
+    textList = [['Save mode', str(matrix.mode)], ['Frame amount', str(matrix.num_frames)], ['Frame time', str(matrix.frame_time)],['Width screen', str(screenResolution[0])], ['Height screen', str(screenResolution[1])], ['Fullscreen', '0']]
+    buttonList = []
+    buttonTextEditorList = []
+    for i in range(len(textList)):
+        buttonList.append(Object(
+            position= (settingsTextStartingPosition[0], settingsTextStartingPosition[1]+settingsTextOffset[1]*i),
+            dimension= settingsTextDimensions,
+            displaySurface= displaySurface,
+            objType= 'text',
+            color= WHITE,
+            string= textList[i][0],
+            accentColor= BLACK
+        ))
+        buttonList[i].addCollider()
+        buttonTextEditorList.append(Object(
+            position= (settingsTextStartingPosition[0]+settingsTextOffset[0], settingsTextStartingPosition[1]+settingsTextOffset[1]*i),
+            dimension= [20,20],
+            displaySurface= displaySurface,
+            objType= 'text',
+            color= WHITE,
+            string= textList[i][1],
+            accentColor= BLACK
+        ))
+        buttonTextEditorList[i].addInput()
+        buttonTextEditorList[i].addCollider()
+
+    saveButton = Object(
+        position= (settingsTextStartingPosition[0], screenResolution[1]-settingsTextOffset[1]),
+        dimension= settingsTextDimensions,
+        displaySurface= displaySurface,
+        objType= 'text',
+        color= WHITE,
+        string= 'SAVE SETTINGS',
+        accentColor= BLACK
+    )
+    saveButton.addCollider()      
+
+    mouseDown = False
+    mouseDownDelay = False
+    pressedKey = ''
+    selectedSetting = 0
+    # settings loop function
+    while True:
+        for i in buttonList:
+            i.drawObject()
+
+        for i in buttonTextEditorList:
+            i.drawObject()
+
+        saveButton.drawObject()
+
+        # mouse down continious
+        if mouseDown:
+            pass
+
+        # mouse down once
+        if mouseDown != mouseDownDelay and mouseDown == True:
+            mouseDownDelay = mouseDown
+            
+            for index, i in enumerate(buttonList):
+                if i.collider.checkForMouseCollision(event.dict):
+                    selectedSetting = index
+
+            if saveButton.collider.checkForMouseCollision(event.dict):
+                matrix.mode = int(buttonTextEditorList[0].string)
+                if matrix.mode > 8:
+                    matrix.mode = 0
+
+                matrix.num_frames = int(buttonTextEditorList[1].string)
+                matrix.frame_time = int(buttonTextEditorList[2].string)
+                screenResolution[0] = int(buttonTextEditorList[3].string)
+                screenResolution[1] = int(buttonTextEditorList[4].string)
+                fullscreen = int(buttonTextEditorList[5].string)
+
+                main()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                terminate()
+            if event.type == MOUSEBUTTONDOWN:
+                mouseDown = True
+            if event.type == MOUSEBUTTONUP:
+                mouseDown = False
+                mouseDownDelay = False
+            if event.type == KEYDOWN:
+                buttonTextEditorList[selectedSetting].updateInput(event.dict['unicode'])
+
+
 
         # Clear the screen and prepare the following frame
         pygame.display.update()

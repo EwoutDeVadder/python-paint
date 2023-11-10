@@ -23,15 +23,22 @@ class Object:
 
         self.accentColor = accentColor
 
+        self.color = color
+
         self.addComponentByType()
 
-        self.color = color
+        self.input = False
+        self.id = ''
 
     def addAccentColor(self, color):
         self.accentColor = color
 
     def addCollider(self):
         self.collider = Collider(self.position, self.dimension)
+
+    def addInput(self):
+        if self.type == 'text':
+            self.input == True
 
     def addComponentByType(self):
         if self.type == 'slider':
@@ -43,7 +50,7 @@ class Object:
             return
         
         if self.type == 'text':
-            self.text = Text()
+            self.text = Text(self.string, self.accentColor, self.color)
             return
 
     def drawObject(self):
@@ -56,8 +63,16 @@ class Object:
             pygame.draw.rect(self.displaySurface, self.color, self.rectangle.rectangle)
 
         if self.type == 'text':
-            self.textFont = self.text.font.render(self.string, True, self.accentColor, self.color)
-            self.displaySurface.blit(self.textFont, self.position)
+            self.displaySurface.blit(self.text.textFont, self.position)
+    
+    def updateInput(self, key):
+        if key == '\x08':
+            self.string = self.string[0:len(self.string)-1]
+        else:
+            self.string += key
+            
+        self.text = Text(self.string, self.accentColor, self.color)
+
 
 #
 # OBJECT CLASS :: TYPES
@@ -82,8 +97,10 @@ class Rectangle:
 
 
 class Text:
-    def __init__(self) -> None:
+    def __init__(self, string, accentColor, color) -> None:
         self.font = pygame.font.Font('freesansbold.ttf', 32)
+        self.textFont = self.font.render(string, True, accentColor, color)
+
 
 #
 # OBJECT CLASS :: COLLIDER
